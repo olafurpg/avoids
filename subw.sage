@@ -80,35 +80,43 @@ def flatten_(lst):
 
 def avs(patt):
     av = set()
-    av.add(tuple([2,1]))
+    av.add(tuple([1, 2]))
     av.add(tuple(patt))
-    print av
+    # print av
     return av
 
 def avoids_(perm, patt):
-    av = avs(patt)
-    return sw_(perm, len(patt), len(patt))
+    banned = avs(patt)
+    return sw(perm, len(patt), len(patt), banned)
 
-
-def sw(perm, l, L):
+def sw(perm, l, L, banned=set()):
     """Returns a list of lists of subwords of perm of length l using dynamic programming
     L == is the original length"""
     if l == 1: # Base case
         k = [[[i]] for i in perm] # list of lists og lists
         return k
     else:
-        smaller = sw(perm, l-1, L) # Solve for l - 1
+        smaller = sw(perm, l-1, L, banned) # Solve for l - 1
+        if l < 5:
+            print smaller
         bigger = [[]] * len(perm)
         for i, v in enumerate(perm): # Prepend for every value in perm 
             if i < L - l: continue              # Too close to beginning of perm to make subword of length L
             elif i > len(perm) - l + 1: break   # subword must consist of values in perm in order
             f = flat(smaller[i+1:])
-            prepend_v = lambda lst : [v] + lst
-            # print "f=", f
-            # for patt in f:
-            #     print patt
-            bigger[i] = map(prepend_v, f)
-        # print bigger
+            ith = []
+            for patt in f:
+                new_subw = [v] + patt # prepend v to pattern
+                check = tuple(flatten_(new_subw))
+                if check not in banned:
+                    # print "Subword %s is allowed %s" % (new_subw, banned)
+                    ith.append(new_subw)
+                else:
+                    if l == L:
+                        print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
+                        return false
+                    print "Subword %s avoids pattern, look no further here" % (new_subw)
+            bigger[i] = ith # subwords
         return bigger
 
 def flat(lst):
