@@ -54,36 +54,37 @@ def sw(perm, l, L, banned=set()):
             bigger[i] = ith # subwords
         return bigger
 
-def avoids_sw(perm, l, L, banned=set()):
+def avoids_pos_(perm, l, L, banned=set(), pos = None):
     """Returns a list of lists of subwords of perm of length l using dynamic programming
     L == is the original length"""
     if l == 1: # Base case
         k = [[[i]] for i in perm] # list of lists og lists
         return k
     else:
-        smaller = avoids_sw(perm, l-1, L, banned) # Solve for l - 1
+        smaller = avoids_pos_(perm, l-1, L, banned, pos) # Solve for l - 1
+        if smaller == False: return False # found banned subword
         bigger = [[]] * len(perm)
         for i, v in enumerate(perm): # Prepend for every value in perm
-            if i < L - l: continue              # Too close to beginning of perm to make subword of length L
-            elif i > len(perm) - l + 1: break   # subword must consist of values in perm in order
-            f = smooth_out(smaller[i+1:]) # make a list of subwords out of list of list of subwords
+            if i > len(perm) - l + 1: break   # reached end, no possible subwords from this position
+            if pos is not None and l == L and i != pos: # only prepend subwords containing pos
+                print "pos = %d, i = %d, l = %d, continuing" % (pos, i, l)
+                continue
+            f = smooth_out(smaller[i + 1:]) # make a list of subwords out of list of list of subwords
             ith = []
             for patt in f:
                 new_subw = [v] + patt # prepend v to pattern
-                check = tuple(flatten_(new_subw))
-                if check not in banned:
-                    # print "Subword %s is allowed %s" % (new_subw, banned)
-                    ith.append(new_subw)
-                else:
-                    if l == L:
-                        # pass
-                        # print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
-                        return false
-                    # print "Pattern avoids subword %s, look no further here" % (new_subw)
+                if i == pos: # only check in banned if we are looking for this position
+                    check = tuple(flatten_(new_subw))
+                    # print "looking for check=%s in banned=%s" % (check, banned)
+                    if check in banned:
+                        print "Subword %s is not allowed, banned=%s" % (new_subw, banned)
+                        return False
+                ith.append(new_subw) # else just append
             bigger[i] = ith # subwords
-        # if l == L:
-        #     return True
-        return bigger
+        if l == L:
+            return True
+        else:
+            return bigger
 
 def avs(patt):
     av = set()
