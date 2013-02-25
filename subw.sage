@@ -124,19 +124,22 @@ def avoids_pos_(perm, l, L, banned=set(), pos = None):
         else:
             return bigger
 
-def avs(patt):
+def avs(patts):
     av = set()
+    for patt in patts:
+        av.add(tuple(patt))
     # av.add(tuple([1, 2])) # used for testing, could basically add any tuple
-    av.add(tuple([3,2,1,4])) # used for testing, could basically add any tuple
+    # av.add(tuple([3,2,1,4])) # used for testing, could basically add any tuple
     # av.add(tuple([2, 3, 1])) # used for testing, could basically add any tuple
     # av.add(tuple([2, 1, 3])) # used for testing, could basically add any tuple
     # av.add(tuple(patt))
+    # print "av=%s" % av
     return av
 
-def subwords_avoiding_(perm, l):
-    """Return a list of the subwords of perm, of length l, which avoid the banned patterns in avs"""
-    banned = avs(patt)
-    return avoids_sw(perm, l, l, banned)
+def subwords_avoiding_(perm, l, patts):
+    """Return a list of the subwords of perm, of length l, which avoid the banned patterns in patts"""
+    banned = avs(patts)
+    return smooth_out(avoids_sw(perm, l, l, banned))
 
 def avoids_(perm, patt):
     banned = avs(patt)
