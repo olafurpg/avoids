@@ -1,71 +1,21 @@
-# perm =  [1,2,3,4,5]
-av = set(tuple([2,1]))
-class Node(object):
-    """My Permutation Node Class, used to prevent unnecessary copying when calculating subwords"""
-    def __init__(self, next, val, pos):
-        self.next = next
-        self.val = val
-        self.pos = pos
 
-    def __str__(self):
-        if self.next:
-            return "{}, {}".format(self.val, str(self.next))
-        else:
-            return "{}".format(self.val)
-
-# n1 = Node(None, 5, 0)
-# n2 = Node(n1, 4, 1)
-# n3 = Node(n2, 3, 2)
-# print n3
-# n2 = Node(n1, 2, 1)
-
-def subwords_ll(perm, l):
-    """Calculates subwords using linked lists instead of """
-    if l == 1:
-        return [ Node(None, perm[i], i) for i in xrange(len(perm))]
-    else:
-        # print l
-        smaller = subwords_ll(perm, l - 1)
-        bigger = []
-        for s in smaller:
-            # print s
-            for p in xrange(s.pos):
-                bigger.append(Node(s, perm[p], p))
-
-        return bigger
-
-# for s in subwords_ll(perm, 2):
+# for s in subwords_node(perm, 2):
 #     print s
 
+def inverse(perm):
+    inv = [0] * len(perm)
+    for i in range(len(perm)):
+        print i, perm, inv
+        inv[perm[i] - 1] = perm[i]
+    return inv
 
-def sw_(perm, l, avoids=set()):
-    """Returns a list of lists of subwords of perm of length l using dynamic programming"""
-    if l == 1: # Base case
-        k = [[[i]] for i in perm] # list of lists og lists
-        return k
-    else:
-        smaller = sw_(perm, l-1) # Solve for l - 1
-        L = len(perm)
-        bigger = [[]] * L
-        # smaller.reverse()
-        print smaller
-        print perm
-        for i in xrange(L): # for list in smaller
-            ith = []
-            for p in xrange(i): # for values in perm which can be prepended to list
-                print "p=%d, i=%d" % (p, i)
-                print "Smaller[i]=", smaller[i]
-                for subw in smaller[i]: # for subword in list
-                    new_subw = [perm[p]] + subw
-                    check = tuple(flatten_(subw))
-                    print new_subw, check, avoids
-                    # print "Check =", check, check in avoids, avoids
-                    # print subw, avoids, new_subw, 
-                    if len(subw) > 0 and check not in avoids:
-                        ith.append(new_subw)
-            bigger[i] = ith
-        # bigger = filter(lambda lst: len(lst) > 0, bigger)
-        return bigger
+def flat_(sw):
+    k1 = lambda n : n[1]
+    k0 = lambda n : n[0]
+    z = zip(sw, range(1,len(sw) + 1))
+    print z
+    z.sort(key = k0)
+    print z
 
 def flatten_(lst):
     """return a flattened list, ex. flatten_(3, 4, 2) == [2,3,1]
@@ -78,16 +28,9 @@ def flatten_(lst):
         f[lst.index(c[x])] = x + 1
     return f
 
-def avs(patt):
-    av = set()
-    av.add(tuple([1, 2]))
-    av.add(tuple(patt))
-    # print av
-    return av
-
-def avoids_(perm, patt):
-    banned = avs(patt)
-    return sw(perm, len(patt), len(patt), banned)
+def smooth_out(lst):
+    """return a flattened list of a list of lists, i.e. concats the lists inside lst"""
+    return [i for sl in lst for i in sl] # fast python implementation
 
 def sw(perm, l, L, banned=set()):
     """Returns a list of lists of subwords of perm of length l using dynamic programming
@@ -97,13 +40,33 @@ def sw(perm, l, L, banned=set()):
         return k
     else:
         smaller = sw(perm, l-1, L, banned) # Solve for l - 1
-        if l < 5:
-            print smaller
+        # if l < 5:
+        #     print smaller
         bigger = [[]] * len(perm)
-        for i, v in enumerate(perm): # Prepend for every value in perm 
+        for i, v in enumerate(perm): # Prepend for every value in perm
             if i < L - l: continue              # Too close to beginning of perm to make subword of length L
             elif i > len(perm) - l + 1: break   # subword must consist of values in perm in order
-            f = flat(smaller[i+1:])
+            f = smooth_out(smaller[i+1:])
+            ith = []
+            for patt in f:
+                new_subw = [v] + patt # prepend v to pattern
+                ith.append(new_subw)
+            bigger[i] = ith # subwords
+        return bigger
+
+def avoids_sw(perm, l, L, banned=set()):
+    """Returns a list of lists of subwords of perm of length l using dynamic programming
+    L == is the original length"""
+    if l == 1: # Base case
+        k = [[[i]] for i in perm] # list of lists og lists
+        return k
+    else:
+        smaller = avoids_sw(perm, l-1, L, banned) # Solve for l - 1
+        bigger = [[]] * len(perm)
+        for i, v in enumerate(perm): # Prepend for every value in perm
+            if i < L - l: continue              # Too close to beginning of perm to make subword of length L
+            elif i > len(perm) - l + 1: break   # subword must consist of values in perm in order
+            f = smooth_out(smaller[i+1:]) # make a list of subwords out of list of list of subwords
             ith = []
             for patt in f:
                 new_subw = [v] + patt # prepend v to pattern
@@ -113,17 +76,29 @@ def sw(perm, l, L, banned=set()):
                     ith.append(new_subw)
                 else:
                     if l == L:
-                        print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
+                        # pass
+                        # print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
                         return false
-                    print "Subword %s avoids pattern, look no further here" % (new_subw)
+                    # print "Pattern avoids subword %s, look no further here" % (new_subw)
             bigger[i] = ith # subwords
+        # if l == L:
+        #     return True
         return bigger
 
-def flat(lst):
-    """return a flattened list of a list of lists, i.e. concats the lists inside lst"""
-    return [i for sl in lst for i in sl] # fast python implementation
+def avs(patt):
+    av = set()
+    # av.add(tuple([1, 2])) # used for testing, could basically add any tuple
+    # av.add(tuple([1, 2, 3])) # used for testing, could basically add any tuple
+    # av.add(tuple([2, 3, 1])) # used for testing, could basically add any tuple
+    # av.add(tuple([2, 1, 3])) # used for testing, could basically add any tuple
+    av.add(tuple(patt))
+    return av
+
+def avoids_(perm, patt):
+    banned = avs(patt)
+    return avoids_sw(perm, len(patt), len(patt), banned)
+
 
 def subwords_(perm, l):
     """User front end, example use: subwords_([1,2,3], 2) == [[1,2],[1,3],[2,3]]"""
-    return flat(sw(perm, l, l))
-    
+    return smooth_out(sw(perm, l, l))
