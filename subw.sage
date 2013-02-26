@@ -2,12 +2,23 @@
 # for s in subwords_node(perm, 2):
 #     print s
 
-def inverse(perm):
+def inverse_on(patt, perm):
     inv = [0] * len(perm)
     for i in range(len(perm)):
-        print i, perm, inv
-        inv[perm[i] - 1] = perm[i]
+        # print i, perm, inv
+        inv[perm[i] - 1] = patt[i]
     return inv
+
+def is_sorted(lst):
+    for i in range(1, len(lst)):
+        if lst[i] < lst[i - 1]:
+            return False
+    return True
+
+def is_in(perm, patt):
+    # print "Is perm=%s in patt=%s ?" % (perm, patt)
+    return is_sorted(inverse_on(perm, patt))
+
 
 def flat_(sw):
     k1 = lambda n : n[1]
@@ -54,15 +65,15 @@ def sw(perm, l, L, banned=set()):
             bigger[i] = ith # subwords
         return bigger
 
-def avoids_sw(perm, l, L, banned=set()):
+def avoids_sw(perm, l, L, banned=set(), incrementing_behind = None):
     """Returns a list of lists of subwords of perm of length l using dynamic programming
     L == is the original length"""
     if l == 1: # Base case
         k = [[[i]] for i in perm] # list of lists og lists
         return k
     else:
-        smaller = avoids_sw(perm, l-1, L, banned) # Solve for l - 1
-        # if smaller == False: return False # found banned subword
+        smaller = avoids_sw(perm, l-1, L, banned, incrementing_behind) # Solve for l - 1
+        if smaller == False: return False # found banned subword
         bigger = [[]] * len(perm)
         for i, v in enumerate(perm): # Prepend for every value in perm
             if i < L - l: continue              # Too close to beginning of perm to make subword of length L
@@ -70,27 +81,72 @@ def avoids_sw(perm, l, L, banned=set()):
             f = smooth_out(smaller[i+1:]) # make a list of subwords out of list of list of subwords
             ith = []
             for patt in f:
+                # if l == 2:
+                #     print "v=%d, patt=%s, incrementing_behind=%s" % (v, patt[0], incrementing_behind)
+                #     if incrementing_behind is True and v < patt[0]:
+                #         print "incrementing behind, skiping new_subw=[%d, %d]" % (v, patt[0])
+                #         continue
+                #     if incrementing_behind is False and v > patt[0]:
+                #         print "decrementing behind, skiping new_subw=[%d, %d]" % (v, patt[0])
+                #         continue
                 new_subw = [v] + patt # prepend v to pattern
-                check = tuple(flatten_(new_subw))
-                if check not in banned:
-                    # look if a subword of this subwords contains a banned pattern
-                    pos = len(new_subw) - 1
-                    if avoids_pos_(new_subw, pos, pos, banned, 0):
-                        ith.append(new_subw)
-                    # else: # we simply skip appending this subword
-                        # print "Subword within subword of subword contained banned pattern"
-                    #     return False
-                    # print "Subword %s is allowed %s" % (new_subw, banned)
-                else:
-                    if l == L:
-                        # pass
-                        # print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
-                        return false
+                if not is_in(new_subw, perm[-l:]):
+                    ith.append(new_subw)
+                elif l == L: # pattern is in
+                    return False
+                # check = tuple(flatten_(new_subw))
+                # if check not in banned:
+                #     # look if a subword of this subwords contains a banned pattern
+                #     pos = len(new_subw) - 1
+                #     if avoids_pos_(new_subw, pos, pos, banned, 0):
+                # else:
+                #     if l == L:
+                #         # print "Permutation %s contains pattern %s at %s" % (perm, check, new_subw)
+                #         return false
                     # print "Pattern avoids subword %s, look no further here" % (new_subw)
             bigger[i] = ith # subwords
-        # if l == L:
-        #     return True
-        return bigger
+        if l == L:
+            return True
+        else:
+            return bigger
+
+def avoids_by_in(perm, l, L, patt):
+    """Returns a list of lists of subwords of perm of length l using dynamic programming
+    L == is the original length"""
+    if l == 1: # Base case
+        k = [[[i]] for i in perm] # list of lists og lists
+        return k
+    else:
+        smaller = avoids_by_in(perm, l-1, L, patt) # Solve for l - 1
+        if smaller == False: return False # found banned subword
+        bigger = [[]] * len(perm)
+        f_patt = flatten_(patt[-l:])
+        for i, v in enumerate(perm): # Prepend for every value in perm
+            if i < L - l: continue              # Too close to beginning of perm to make subword of length L
+            elif i > len(perm) - l + 1: break   # subword must consist of values in perm in order
+            f = smooth_out(smaller[i+1:]) # make a list of subwords out of list of list of subwords
+            ith = []
+            for subw in f:
+                new_subw = [v] + subw # prepend v to pattern
+                # print "new_subw=%s, f_patt[-l:]=%s" % (new_subw, f_patt[-l:])
+                if is_in(new_subw, f_patt[-l:]):
+                    # print "new_subw=%s is in f_patt[-l:]=%s" % (new_subw, f_patt[-l:])
+                    ith.append(new_subw)
+                    if l == L: # pattern is in
+                        print "new_subw=%s is in f_patt[-l:]=%s" % (new_subw, f_patt[-l:])
+                        # print "Returning False"
+                        return False
+                else:
+                    pass
+                    # print "new_subw=%s is not in patt[-l:]=%s" % (new_subw, patt[-l:])
+            bigger[i] = ith # subwords
+        if l == L:
+            return True
+        else:
+            return bigger
+
+def avoids2_(perm, patt):
+    return avoids_by_in(perm, len(patt), len(patt), patt)
 
 def avoids_pos_(perm, l, L, banned=set(), pos = None):
     """Returns a list of lists of subwords of perm of length l using dynamic programming
@@ -101,6 +157,7 @@ def avoids_pos_(perm, l, L, banned=set(), pos = None):
     else:
         smaller = avoids_pos_(perm, l-1, L, banned, pos) # Solve for l - 1
         if smaller == False: return False # found banned subword
+
         bigger = [[]] * len(perm)
         for i, v in enumerate(perm): # Prepend for every value in perm
             if i > len(perm) - l + 1: break   # reached end, no possible subwords from this position
@@ -119,27 +176,30 @@ def avoids_pos_(perm, l, L, banned=set(), pos = None):
                         return False
                 ith.append(new_subw) # else just append
             bigger[i] = ith # subwords
-        if l == L:
-            return True
-        else:
-            return bigger
+        # if l == L:
+        #     if len(smooth_out(bigger)) == 0
+        #         return bigger
+
+        # else:
+        return bigger
 
 def avs(patts):
     av = set()
     for patt in patts:
         av.add(tuple(patt))
-    # av.add(tuple([1, 2])) # used for testing, could basically add any tuple
-    # av.add(tuple([3,2,1,4])) # used for testing, could basically add any tuple
-    # av.add(tuple([2, 3, 1])) # used for testing, could basically add any tuple
-    # av.add(tuple([2, 1, 3])) # used for testing, could basically add any tuple
-    # av.add(tuple(patt))
     # print "av=%s" % av
     return av
+
 
 def subwords_avoiding_(perm, l, patts):
     """Return a list of the subwords of perm, of length l, which avoid the banned patterns in patts"""
     banned = avs(patts)
-    return smooth_out(avoids_sw(perm, l, l, banned))
+    incrementing_behind = patts[-1][-1] > patts[-1][-2]
+    lst = avoids_sw(perm, l, l, banned, incrementing_behind)
+    if lst is False or lst is True:
+        return lst
+    else:
+        return smooth_out(lst)
 
 def avoids_(perm, patt):
     banned = avs(patt)
