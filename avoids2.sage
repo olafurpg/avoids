@@ -134,11 +134,26 @@ class Patt(object):
         # initializing method variables
         self.patt_len = len(patt)
         self.f_patts = [None] * self.patt_len
+        self.f_smaller = [None] * self.patt_len
+        self.f_larger = [None] * self.patt_len
         self.sw = [[[] for i in range(self.perm_len)] for j in range(self.patt_len)]
 
         # set up
         for i in range(self.patt_len):
-            self.f_patts[self.patt_len - i - 1] = flatten_(self.patt[i:])
+            p = self.patt_len - i - 1
+            self.f_patts[p] = flatten_(self.patt[i:])
+            front = self.f_patts[p][0]
+            try: # smaller
+                self.f_smaller[p] = self.f_patts[p].index(front - 1) - 1
+            except:
+                pass
+            try: # larger
+                self.f_larger[p] = self.f_patts[p].index(front + 1) - 1
+            except:
+                pass
+            # print i + 1, p ,  self.f_patts[p], self.f_smaller[p], self.f_larger[p]
+
+
 
     # @profile
     def is_contained_in(self, perm):
@@ -163,20 +178,13 @@ class Patt(object):
                 # prepend perm[j] to every possible smaller subword
                 for k in range(j + 1, self.perm_len):
                     for sub in self.sw[i - 1][k]: # for every little subword to prepend to
-                        if (perm[j] < sub[0]) != (self.f_patts[i][0] < self.f_patts[i][1]): # 20% increase
-                            # print "Continuing"
-                            continue # heads of patt and new subword don't match
                         new_subw = [perm[j]] + sub
-
-                        # print new_subw, self.f_patts[i], is_in(new_subw, self.f_patts[i])
-                        if is_in(new_subw, self.f_patts[i]):
-                            if i == self.patt_len - 1: # Found total pattern in permutation
-                                print "Founds patt=%s, subw=%s in perm=%s" % (self.patt, new_subw, perm)
-                                return False
-                            # print self.sw[i][j], new_subw
-                            self.sw[i][j].append(new_subw)
-                        # else do nothing. the subword is not in the pattern
-                        # prt_2d(self.sw)
+                        if (self.f_smaller[i] is not None and perm[j] < sub[self.f_smaller[i]]) or \
+                                (self.f_larger[i] is not None and perm[j] > sub[self.f_larger[i]]):
+                            continue
+                        if i == self.patt_len - 1:
+                            return False
+                        self.sw[i][j].append(new_subw)
 
         return True # did not find pattern in permutation
 
