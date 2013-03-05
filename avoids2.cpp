@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <iostream>
+#include <list>
 #include "string.h"
 #include "stdlib.h"
 
@@ -61,19 +63,69 @@ int *flatten(int n, int *lst) {
     return f;
 }
 
+bool avoids_it(int perm_len, int patt_len, int perm[], int patt[]) {
+    list<int*> sw[patt_len][perm_len];
+    for (int j = patt_len - 1; j < perm_len; ++j)
+    {
+        int t[] = {perm[j]};
+        sw[0][j].push_back(t);
+
+        for (list<int*>::iterator sub = sw[0][j].begin(); sub != sw[0][j].end(); ++sub)
+        {
+            ;
+            // cout << (*sub)[0] << endl;
+        }
+    }
+
+    for (int i = perm_len - 1; i > 0; --i)
+    {
+        for (int j = 1; j < patt_len - 1; ++j)
+        {
+            if (j + i < patt_len - 1) { continue; } // top-left corner
+            if (j + i > perm_len - 1) { continue; } // bottom-right corner
+            for (int k = j + 1; k < perm_len; ++k)
+            {
+                // cout << j << " " << i << " " << k << endl;
+                for (list<int*>::iterator sub = sw[j - 1][k].begin(); sub != sw[j - 1][k].end(); ++sub)
+                {
+                    print_arr(j + 1, *sub);
+                    int new_sw[j + 1];
+                    new_sw[0] = perm[j];
+                    memcpy((new_sw + 1), *sub, sizeof(new_sw) - 4);
+                    print_arr(j + 1, new_sw);
+                    sw[i][j].push_back(new_sw);
+                    // int
+                    // *sub.push_back()
+                    // if ((perm[j] < (*sub)[0]))
+                    // {
+                    //     /* code */
+                    // }
+                    ;
+                }
+            }
+        }
+    }
+}
 
 
 int main(int argc, char const *argv[])
 {
-    int perm [] = {6,2,3,4};
-    int patt [] = {4,1,2,3};
-    int n = 4;
-    int *inv = inverse_on(n, perm, patt);
-    printf("Is in? %d\n", is_in(n, perm, patt));
+    int perm [] = {1,2,3,4,5};
+    int patt [] = {1,2,3};
+    int perm_len = 5;
+    int patt_len = 3;
+    avoids_it(perm_len, patt_len, perm, patt);
+    int cpy[7];
+    cpy[0] = 10;
+    // memcpy((cpy + 1), perm, sizeof(cpy) - 4);
+    // print_arr(7, cpy);
+    // int *inv = inverse_on(n, perm, patt);
+    // printf("Is in? %d\n", is_in(n, perm, patt));
+
     // print_arr(n, perm);
 
-    print_arr(n, perm);
-    int * f = flatten(n, perm);
-    print_arr(n, f);
+    // print_arr(n, perm);
+    // int * f = flatten(n, perm);
+    // print_arr(n, f);
     return 0;
 }
