@@ -155,7 +155,7 @@ class Patt(object):
 
 
 
-    # @profile
+#     @profile
     def is_contained_in(self, perm):
         # print self.patt, perm
         if len(perm) != self.perm_len:
