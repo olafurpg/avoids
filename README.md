@@ -1,6 +1,6 @@
-A dynamic programming approach to avoids
-=================
 UROP - Spring semester 2013.
+=================
+## A dp approach to avoids
 Two versions
 * Sage
 * Cython
