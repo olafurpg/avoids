@@ -35,7 +35,5 @@ nosetests.xml
 .pydevproject
 
 # Cython
-*.sageCRQ1I8
-*.sageCRQ1I8.py
-*.sagedA50me
-*.sagedA50me.py
+*.sage*
+*.sage*.py

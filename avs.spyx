@@ -1,4 +1,5 @@
 import sys
+from sage.combinat.permutation import Permutations
 
 # @profile
 def flatten_(lst):
@@ -90,7 +91,7 @@ def avoids(perm, patt):
     P = Patt(patt, len(perm))
     return P.is_contained_in(perm)
 
-def avoiders(patt, perm_len):
+def count_avoiders_slow(patt, perm_len):
     """Counts the number of permutations of length perm_len that avoid the given pattern patt"""
     patt = Patt(patt, perm_len)
     Perms = Permutations(perm_len)
@@ -114,7 +115,7 @@ def expand_avoiders(patt, perms):
             avs += expand(perm)
     return avs
 
-def count(patt, n):
+def count_avoiders_fast(patt, n):
     """Returns the number of permutations of length n that avoid patt"""
     l = len(patt) + 1
     P = Permutations(l)
