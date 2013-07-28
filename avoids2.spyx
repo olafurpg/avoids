@@ -37,10 +37,10 @@ class Patt(object):
     """A Classical Pattern and a specific length of permutations"""
     def __init__(self, patt, perm_len):
         # Confirm that patt is a valid permutation
-        try:
-            Permutation(patt)
-        except ValueError, e:
-            raise e
+        # try:
+        #     Permutation(patt)
+        # except ValueError, e:
+        #     raise e
         if perm_len <= len(patt):
             s = "Permutation length has to be larger than Pattern length"
             raise Exception(s)
@@ -79,10 +79,10 @@ class Patt(object):
 
         Fast implementation, might allocate a lot of memory"""
         # Confirm that perm is a valid permutation
-        try:
-            Permutation(perm)
-        except ValueError, e:
-            raise e
+        # try:
+        #     Permutation(perm)
+        # except ValueError, e:
+        #     raise e
 
         # Confirm that perm is of compatible length
         if len(perm) != self.perm_len:
@@ -175,7 +175,6 @@ class Pattern(object):
 
     def avoiders(self, n):
         """Generator for permutations of length n that avoid Pattern"""
-        # avoiders = []
         def derived_avoiders(perm):
             """docstring for derived_avoiders"""
             if self.avoided_by(perm):
@@ -190,14 +189,15 @@ class Pattern(object):
 
     def avoiders_cardinality(self, n):
         """Number of permutations of length n that avoid Pattern"""
-        n = 0
-        for perm in self.avoiders(n):
-            n += 1
-        return n
+        # n = 0
+        # for perm in self.avoiders(n):
+        #     n += 1
+        # return n
+        return len(self.avoiders_list(n))
 
-    def avoiders_list(self, perm_len):
+    def avoiders_list(self, n):
         """List of permutations of length n that avoid Pattern"""
-        return list(self.avoiders(perm_len))
+        return list(self.avoiders(n))
 
     def expanded(self, perm):
         """Generator for exansions of perm
