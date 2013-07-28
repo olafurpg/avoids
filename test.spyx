@@ -1,9 +1,0 @@
-def parr(arr):
-    """docstring for parr"""
-    cdef int l = len(arr)
-    cdef int a[l]
-    cdef int i = 0
-    # for i in xrange(l):
-    #     a[i] = arr[i]
-    #     print a[i]
-    
