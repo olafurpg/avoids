@@ -1,4 +1,15 @@
-from sage.combinat.permutation import Permutations
+"""
+A Pattern module for Sage Mathematics
+
+Contains fast implementations for methods Patt.subwords using
+dynamic programming and Patt.avoid by reducing redundant computations.
+"""
+# TODO: Profiling
+# TODO: Test cases
+# TODO: Calculate inverse of f_patts instead of ugly try/catch
+
+# Used when compiling down to c
+from sage.combinat.permutation import Permutations, Permutation
 
 
 def flatten_(lst):
@@ -16,78 +27,114 @@ def flatten_(lst):
 
 
 def prt_2d(arr):
+    """Pretty print a 2d array"""
     print ""
     for row in arr:
         print row
 
 
+class Patt(object):
+    """A Classical Pattern and a specific length of permutations"""
+    def __init__(self, patt, perm_len):
+        # Confirm that patt is a valid permutation
+        try:
+            Permutation(patt)
+        except ValueError, e:
+            raise e
+        if perm_len <= len(patt):
+            s = "Permutation length has to be larger than Pattern length"
+            raise Exception(s)
+
+        self.patt = patt
+        self.perm_len = perm_len
+
+        # initializing method variables
+        self.patt_len = len(patt)
+        self.f_patts = [None] * self.patt_len
+        self.below = [None] * self.patt_len
+        self.above = [None] * self.patt_len
+
+        # 2d array of subwords
+        # patt_len nr. of rows
+        # perm_len nr. of columns
+        self.subword_matrix = [[[] for i in xrange(self.perm_len)] for j in xrange(self.patt_len)]
+
+        # ugly block
+        # find out index of value above and below i
+        for i in xrange(self.patt_len):
+            p = self.patt_len - i - 1
+            self.f_patts[p] = flatten_(self.patt[i:])
+            front = self.f_patts[p][0]
+            try:  # smaller
+                self.below[p] = self.f_patts[p].index(front - 1) - 1
+            except:
+                pass
+            try:  # larger
+                self.above[p] = self.f_patts[p].index(front + 1) - 1
+            except:
+                pass
+
+    def subwords(self, perm):
+        """Generator for subwords of perm that contain Patt
+
+        Fast implementation, might allocate a lot of memory"""
+        # Confirm that perm is a valid permutation
+        try:
+            Permutation(perm)
+        except ValueError, e:
+            raise e
+
+        # Confirm that perm is of compatible length
+        if len(perm) != self.perm_len:
+            raise Exception("""Permutation of incompatible length
+    should be %d but received %d""" % (self.perm_len, len(perm)))
+            return False
+
+        subword_matrix = self.subword_matrix  # simplify code
+
+        # First row
+        for j in xrange(self.patt_len - 1, self.perm_len):
+            subword_matrix[0][j] = []
+            subword_matrix[0][j].append([perm[j]])
+
+        # Following rows
+        for j in reversed(xrange(self.perm_len)):    # column j
+            for i in xrange(1, self.patt_len):       # row i
+                # reuse initialized 2d matrix
+                if len(subword_matrix[i][j]) > 0:
+                    subword_matrix[i][j] = []
+
+                # Skip corners of the matrix
+                if j + i < self.patt_len - 1:  # top left corner
+                    continue
+                if j + i > self.perm_len - 1:  # bottom right corner
+                    continue
+
+                # prepend perm[j] to every possible smaller subword
+                for k in xrange(j + 1, self.perm_len):
+                    # for every little subword to prepend to
+                    for subword in subword_matrix[i - 1][k]:
+                        below = self.below[i]
+                        if below is not None and perm[j] < subword[below]:
+                            continue
+
+                        above = self.above[i]
+                        if above is not None and perm[j] > subword[above]:
+                            continue
+
+                        new_subw = [perm[j]] + subword
+
+                        # length of patt reached?
+                        if i == self.patt_len - 1:
+                            yield new_subw
+                        else:
+                            subword_matrix[i][j].append(new_subw)
+
+        raise StopIteration()  # No more subwords
+
+
 class Pattern(object):
-    """docstring for Pattern"""
-    class Patt(object):
-        """A pattern object is a classical pattern along with a specific length (int).
-
-        Can check if the pattern is contained in any permutation with the given length
-        """
-        def __init__(self, patt, perm_len):
-            self.patt = patt
-            self.perm_len = perm_len
-            # initializing method variables
-            self.patt_len = len(patt)
-            self.f_patts = [None] * self.patt_len
-            self.f_smaller = [None] * self.patt_len
-            self.f_larger = [None] * self.patt_len
-            self.sw = [[[] for i in xrange(self.perm_len)] for j in xrange(self.patt_len)]
-
-            # set up
-            for i in xrange(self.patt_len):
-                p = self.patt_len - i - 1
-                self.f_patts[p] = flatten_(self.patt[i:])
-                front = self.f_patts[p][0]
-                try: # smaller
-                    self.f_smaller[p] = self.f_patts[p].index(front - 1) - 1
-                except:
-                    pass
-                try: # larger
-                    self.f_larger[p] = self.f_patts[p].index(front + 1) - 1
-                except:
-                    pass
-                # print i + 1, p ,  self.f_patts[p], self.f_smaller[p], self.f_larger[p]
-
-    #     @profile
-        def subwords(self, perm):
-            # print self.patt, perm
-            if len(perm) != self.perm_len:
-                print "Permutation of incompatible length, should be %d, received %d" %(self.perm_len, len(perm))
-                return False
-            for j in xrange(self.patt_len - 1, self.perm_len):
-                self.sw[0][j] = []
-                self.sw[0][j].append([perm[j]])
-            # prt_2d(self.sw)
-            # prt_2d(self.sw)
-            for j in reversed(xrange(self.perm_len)):    # column j
-                for i in xrange(1, self.patt_len):       # row i
-                    # print i, j
-                    if len(self.sw[i][j]) > 0:
-                        self.sw[i][j] = [] # reuse initialized 2d matrix
-                    if j + i < self.patt_len - 1: # top left corner
-                        continue
-                    if j + i > self.perm_len - 1: # bottom right corner
-                        continue
-                    # prepend perm[j] to every possible smaller subword
-                    for k in xrange(j + 1, self.perm_len):
-                        for sub in self.sw[i - 1][k]: # for every little subword to prepend to
-                            if (self.f_smaller[i] is not None and perm[j] < sub[self.f_smaller[i]]) or \
-                                    (self.f_larger[i] is not None and perm[j] > sub[self.f_larger[i]]):
-                                continue
-                            new_subw = [perm[j]] + sub
-                            if i == self.patt_len - 1: # patt length reached
-                                # perm contains patt
-                                yield new_subw
-                            else:
-                                self.sw[i][j].append(new_subw)
-
-            raise StopIteration()  # did not find pattern in permutation
-
+    """A Classical Pattern"""
     def __init__(self, pattern):
         self.pattern = pattern
         self.patt_lens = set()
@@ -99,45 +146,72 @@ class Pattern(object):
         self.patts = {}
 
     def get_patt(self, perm):
-        """Patt initiated with correct length"""
+        """Patt object with corresponding length for perm"""
         if not len(perm) in self.patt_lens:
             self.patt_lens.add(len(perm))
-            self.patts[len(perm)] = self.Patt(self.pattern, len(perm))
+            self.patts[len(perm)] = Patt(self.pattern, len(perm))
         return self.patts[len(perm)]
 
+    def subwords(self, perm):
+        """Generator for subwords of perm containing Pattern"""
+        patt = self.get_patt(perm)
+        return patt.subwords(perm)
+
     def subwords_list(self, perm):
+        """List of subwords of perm containing Pattern"""
         return list(subword for subword in self.subwords(perm))
 
     def subwords_print(self, perm):
+        """Print out subwords of perm containing Pattern"""
         for subword in self.subwords(perm):
             print subword
-
-    def subwords(self, perm):
-        patt = self.get_patt(perm)
-        return patt.subwords(perm)
 
     def avoided_by(self, perm):
         """True if perm avoids pattern, false otherwise"""
         for subword in self.subwords(perm):
+            # we only need one subword
             return False
         return True
+
+    def avoiders(self, n):
+        """Generator for permutations of length n that avoid Pattern"""
+        # avoiders = []
+        def derived_avoiders(perm):
+            """docstring for derived_avoiders"""
+            if self.avoided_by(perm):
+                if len(perm) == n:
+                    yield perm
+                else:
+                    for new_perm in self.expanded(perm):
+                        yield from derived_avoiders(new_perm)
+
+        for perm in Permutations(len(self.pattern) + 1):
+            yield from derived_avoiders(perm)
+
+    def avoiders_cardinality(self, n):
+        """Number of permutations of length n that avoid Pattern"""
+        n = 0
+        for perm in self.avoiders(n):
+            n += 1
+        return n
+
+    def avoiders_list(self, perm_len):
+        """List of permutations of length n that avoid Pattern"""
+        return list(self.avoiders(perm_len))
+
+    def expanded(self, perm):
+        """Generator for exansions of perm
+
+        >>> [perm for perm in expand([1,2,3])]
+        [[4, 1, 2, 3], [1, 4, 2, 3], [1, 2, 4, 3], [1, 2, 3, 4]]
+        """
+        n = len(perm) + 1
+        for i in xrange(len(perm)):
+            yield perm[:i] + [n] + perm[i:]
+        yield perm + [n]
 
     def __str__(self):
         return "Pattern %s" % self.pattern
 
     def __repr__(self):
         return "Pattern %s" % self.pattern
-
-
-# def avoids(perm, patt):
-#     """Initializes a Patt object and calls method is_contained_by to check for avoidance"""
-#     P = Patt(patt, len(perm))
-#     return P.is_contained_in(perm)
-
-# def avoiders(patt, perm_len):
-#     """Counts the number of permutations of length perm_len that avoid the given pattern patt"""
-#     patt = Patt(patt, perm_len)
-#     Perms = Permutations(perm_len)
-#     f = lambda perm : not patt.is_contained_in(perm)
-#     return Perms.filter(f).cardinality()
-
