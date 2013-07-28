@@ -37,3 +37,6 @@ nosetests.xml
 # Cython
 *.sage*
 *.sage*.py
+
+# LaTeX
+*.out
