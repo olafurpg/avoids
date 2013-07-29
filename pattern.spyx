@@ -36,6 +36,10 @@ def prt_2d(arr):
 class LengthPattern(object):
     """A Classical Pattern and a specific length of permutations"""
     def __init__(self, patt, perm_len):
+        """Initialise LengthPattern with a classical pattern patt (list) and integer length perm_len (int)
+
+        >>> LengthPattern([1,2,3,4], 10)
+        LengthPattern [1, 2, 3, 4] with length 10"""
         # Confirm that patt is a valid permutation
         Permutation(patt)
 
@@ -75,7 +79,11 @@ class LengthPattern(object):
     def subwords(self, perm):
         """Generator for subwords of perm that contain Patt
 
-        Fast implementation, might allocate a lot of memory"""
+        Fast implementation, might allocate a lot of memory
+
+        >>> [perm for perm in LengthPattern([1,2,3], 4).subwords([1,2,3,4])]
+        [[2, 3, 4], [1, 2, 3], [1, 2, 4], [1, 3, 4]]"""
+
         # Confirm that perm is a valid Permutation
         Permutation(perm)
 
@@ -127,6 +135,12 @@ class LengthPattern(object):
 
         raise StopIteration()  # No more subwords
 
+    def __str__(self):
+        return "LengthPattern %s with length %s" % (self.patt, self.perm_len)
+
+    def __repr__(self):
+        return "LengthPattern %s with length %s" % (self.patt, self.perm_len)
+
 
 class Pattern(object):
     """A Classical Pattern"""
@@ -145,19 +159,28 @@ class Pattern(object):
         print "Cache cleared"
 
     def get_patt(self, perm):
-        """Patt object with corresponding length for perm"""
+        """Patt object with corresponding length for perm
+
+        >>> Pattern([1,2,3]).get_patt([1,2,3,4])
+        LengthPattern [1, 2, 3] with length 4"""
         if not len(perm) in self.patt_lens:
             self.patt_lens.add(len(perm))
             self.patts[len(perm)] = LengthPattern(self.pattern, len(perm))
         return self.patts[len(perm)]
 
     def subwords(self, perm):
-        """Generator for subwords of perm containing Pattern"""
+        """Generator for subwords of perm containing Pattern
+
+        >>> [perm for perm in Pattern([1,2,3]).subwords([1,5,2,4,3])]
+        [[1, 2, 4], [1, 2, 3]]"""
         patt = self.get_patt(perm)
         return patt.subwords(perm)
 
     def subwords_list(self, perm):
-        """List of subwords of perm containing Pattern"""
+        """List of subwords of perm containing Pattern
+
+        >>> Pattern([1,2,3]).subwords_list([1,5,2,4,3])
+        [[1, 2, 4], [1, 2, 3]]"""
         return list(subword for subword in self.subwords(perm))
 
     def subwords_print(self, perm):
@@ -166,14 +189,35 @@ class Pattern(object):
             print subword
 
     def avoided_by(self, perm):
-        """True if perm avoids pattern, false otherwise"""
+        """True if perm avoids pattern, false otherwise
+
+        >>> Pattern([1,2,3]).avoided_by([4,3,1,2,5])
+        False
+        >>> Pattern([1,2,3]).avoided_by([5,4,3,1,2])
+        True"""
         for subword in self.subwords(perm):
             # we only need one subword
             return False
         return True
 
     def avoiders(self, n):
-        """Generator for permutations of length n that avoid Pattern"""
+        """Generator for permutations of length n that avoid Pattern
+
+        >>> [perm for perm in Pattern([1,2,3]).avoiders(4)]
+        [[1, 4, 3, 2],
+        [2, 1, 4, 3],
+        [2, 4, 1, 3],
+        [2, 4, 3, 1],
+        [3, 1, 4, 2],
+        [3, 2, 1, 4],
+        [3, 2, 4, 1],
+        [3, 4, 1, 2],
+        [3, 4, 2, 1],
+        [4, 1, 3, 2],
+        [4, 2, 1, 3],
+        [4, 2, 3, 1],
+        [4, 3, 1, 2],
+        [4, 3, 2, 1]]"""
         int(n)
         def derived_avoiders(perm):
             """docstring for derived_avoiders"""
@@ -188,14 +232,30 @@ class Pattern(object):
             yield from derived_avoiders(perm)
 
     def avoiders_cardinality(self, n):
-        """Number of permutations of length n that avoid Pattern"""
-        n = 0
-        for perm in self.avoiders(n):
-            n += 1
-        return n
+        """Number of permutations of length n that avoid Pattern
+
+        >>> Pattern([1,2,3]).avoiders_cardinality(10)
+        16796"""
+        return len(self.avoiders_list(n))
 
     def avoiders_list(self, n):
-        """List of permutations of length n that avoid Pattern"""
+        """List of permutations of length n that avoid Pattern
+
+        >>> Pattern([1,2,3]).avoiders_list(4)
+        [[1, 4, 3, 2],
+        [2, 1, 4, 3],
+        [2, 4, 1, 3],
+        [2, 4, 3, 1],
+        [3, 1, 4, 2],
+        [3, 2, 1, 4],
+        [3, 2, 4, 1],
+        [3, 4, 1, 2],
+        [3, 4, 2, 1],
+        [4, 1, 3, 2],
+        [4, 2, 1, 3],
+        [4, 2, 3, 1],
+        [4, 3, 1, 2],
+        [4, 3, 2, 1]]"""
         return list(self.avoiders(n))
 
     def expanded(self, perm):
