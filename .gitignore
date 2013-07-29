@@ -35,8 +35,13 @@ nosetests.xml
 .pydevproject
 
 # Cython
+*.spyxc
 *.sage*
 *.sage*.py
 
 # LaTeX
 *.out
+
+# Project specific
+html/*
+pdf/*
