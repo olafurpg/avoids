@@ -1,0 +1,11 @@
+\contentsline {section}{Contents}{1}{section*.1}
+\contentsline {section}{\numberline {1}Script script-avoids2\_spyx}{2}{section.1}
+\contentsline {subsection}{\numberline {1.1}Classes}{2}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Functions}{2}{subsection.1.2}
+\contentsline {section}{\numberline {2}Class script-avoids2\_spyx.LengthPattern}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}Methods}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Properties}{3}{subsection.2.2}
+\contentsline {section}{\numberline {3}Class script-avoids2\_spyx.Pattern}{4}{section.3}
+\contentsline {subsection}{\numberline {3.1}Methods}{4}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Properties}{6}{subsection.3.2}
+\contentsline {section}{Index}{8}{section*.2}

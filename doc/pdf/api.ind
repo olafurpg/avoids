@@ -1,0 +1,35 @@
+\begin{theindex}
+
+  \item script-avoids2\_spyx \textit{(script)}, \hyperpage{2}
+    \subitem script-avoids2\_spyx.flatten\_ \textit{(function)}, 
+		\hyperpage{2}
+    \subitem script-avoids2\_spyx.LengthPattern \textit{(class)}, 
+		\hyperpage{3}
+      \subsubitem script-avoids2\_spyx.LengthPattern.subwords \textit{(method)}, 
+		\hyperpage{3}
+    \subitem script-avoids2\_spyx.Pattern \textit{(class)}, 
+		\hyperpage{4--7}
+      \subsubitem script-avoids2\_spyx.Pattern.avoided\_by \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem script-avoids2\_spyx.Pattern.avoiders \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem script-avoids2\_spyx.Pattern.avoiders\_cardinality \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem script-avoids2\_spyx.Pattern.avoiders\_list \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem script-avoids2\_spyx.Pattern.clear\_cache \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem script-avoids2\_spyx.Pattern.expanded \textit{(method)}, 
+		\hyperpage{6}
+      \subsubitem script-avoids2\_spyx.Pattern.get\_patt \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem script-avoids2\_spyx.Pattern.subwords \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem script-avoids2\_spyx.Pattern.subwords\_list \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem script-avoids2\_spyx.Pattern.subwords\_print \textit{(method)}, 
+		\hyperpage{4}
+    \subitem script-avoids2\_spyx.prt\_2d \textit{(function)}, 
+		\hyperpage{2}
+
+\end{theindex}
