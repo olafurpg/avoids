@@ -45,3 +45,4 @@ nosetests.xml
 # Project specific
 html/*
 pdf/*
+doc/**
