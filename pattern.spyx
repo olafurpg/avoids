@@ -10,10 +10,6 @@ dynamic programming and Pattern.avoid by reducing redundant computations.
 # TODO: lst representation of Pattern class
 # TODO: mesh pattern avoidance
 
-# Used when compiling down to c
-from sage.combinat.permutation import Permutations, Permutation
-from sage.combinat.subword import Subwords
-
 
 def flatten_(lst):
     """Return a flattened list
@@ -116,10 +112,12 @@ Contains a rich interface that is simple to use."""
                     yield perm
                 else:
                     for new_perm in self.expanded(perm):
-                       yield from derived_avoiders(new_perm)
+
+                        derived_avoiders(new_perm)
 
         for perm in Permutations(len(self.pattern) + 1):
-            yield from derived_avoiders(perm)
+            for deriv in derived_avoiders(perm):
+                yield deriv
 
     def avoiders_cardinality(self, n):
         """Count the number of permutations of length n that avoid Pattern
@@ -235,7 +233,6 @@ More restricted interface, see Pattern class for better interface."""
         if len(perm) != self.perm_len:
             raise Exception("""Permutation of incompatible length
     should be %d but received %d""" % (self.perm_len, len(perm)))
-            return False
 
         subword_matrix = self.subword_matrix  # simplify code
 
@@ -422,4 +419,5 @@ def is_sorted(lst):
         if lst[i] > lst[i+1]:
             return False
     return True
+
 
